@@ -8,6 +8,7 @@ Route::get('/hello', [WelcomeController::class, 'hello']);
 
 Route::get('/greet/{name}', [WelcomeController::class, 'greet']);
 
+// Team pull test
 Route::get('/ping', function () {
     return response()->json([
         'pong' => true,
