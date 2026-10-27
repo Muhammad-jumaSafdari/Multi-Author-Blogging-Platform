@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Sanctum\HasApiTokens;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -15,13 +17,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    use HasApiTokens, HasFactory, Notifiable;
     protected function casts(): array
     {
         return [
@@ -29,4 +25,41 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function likedPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class, 'post_likes')
+                    ->withPivot('created_at');
+    }
+
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'user_follows',
+            'follower_id',
+            'followed_id'
+        )->withPivot('created_at');
+    }
+
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'user_follows',
+            'followed_id',
+            'follower_id'
+        )->withPivot('created_at');
+    }
 }
+
